@@ -20,7 +20,7 @@ function request(method: string){
         if(body){
             requestOptions.headers = {
                 ...requestOptions.headers,
-                'Content-Type': 'applicatino/json'
+                'Content-Type': 'application/json'
             };
             requestOptions.body = JSON.stringify(body);
         }
@@ -68,4 +68,5 @@ async function handleResponse(response: Response): Promise<any>{
         const error = (data && data.message) || response.statusText;
         return Promise.reject(error);
     }
+    return data;
 }

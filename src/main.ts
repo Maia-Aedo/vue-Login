@@ -24,7 +24,7 @@ async function startApp() {
     } catch (error) {
         console.warn('No hay datos de autenticación para el usuario');
         console.info('Redirigiendo a login page');
-        router.push('/login')
+        router.push('/')
     }
 
     app.mount('#app')

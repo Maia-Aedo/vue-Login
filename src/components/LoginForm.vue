@@ -3,18 +3,21 @@
 import { useUserStore } from '@/stores/userStore';
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore';
+import { useSesionStore } from '@/stores/sesionStore'
 // Library imports
 import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 
-const uStore = useUserStore();
 const router = useRouter();
 const authStore = useAuthStore();
+const sesionStore = useSesionStore();
 
 const schema = Yup.object().shape({
   username: Yup.string().required('Usuario requerido'),
   password: Yup.string().required('Contraseña requerida')
 })
+
+console.info('[LoginForm] AuthData:', authStore.auth.data)
 
 if(authStore.auth.data){
   router.push('/home')
@@ -22,8 +25,14 @@ if(authStore.auth.data){
 
 function handleSubmit(values: any, { setErrors }: any){
   const { username, password } = values;
+  
   return authStore.login(username, password).then(() =>{
-    router.push('/');
+    const token = authStore.auth.data?.jwtToken;
+
+    if(token){
+      sesionStore.startTokenTimer(token);
+    }
+    router.push('/home');
   })
   .catch(error => setErrors({ apiError: error }))
 }

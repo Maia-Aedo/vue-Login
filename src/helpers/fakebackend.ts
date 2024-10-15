@@ -1,4 +1,4 @@
-export { fakeBackend as fakeBackend };
+export { fakeBackend };
 
 import type { User } from '@/models/UserModel'
 import type { JwtPayload } from '@/models/JwtModel';
@@ -8,11 +8,11 @@ import type { AuthRequestBody } from '@/models/AuthReqModel';
 // Users array in localstorage
 const usersKey = 'vue-3-jwt-refresh-token-users';
 const users: User[] = JSON.parse(localStorage.getItem(usersKey) || '[]');
-
+// localStorage.clear()
 // Add a test user in localstorage if there isn't any
 const user: User = {
     id: 1,
-    firstName: 'Ignacio',
+    firstName: 'Maia',
     lastName: 'Aedo',
     username: 'test',
     password: 'test',
@@ -20,10 +20,28 @@ const user: User = {
     refreshTokens: []
 }
 
+const user2: User = {
+    id: 2,
+    firstName: 'Mara',
+    lastName: 'prueba',
+    username: 'prueba',
+    password: 'prueba',
+    isAdmin: false,
+    refreshTokens: []
+}
 
 // If there's no users, create one and save it in localstorage
-if (!users.length) {
+if (!users.length || users.length < 2) {
     users.push(user);
+    users.push(user2);
+    if(users.length > 2){
+        users.shift();
+    }
+    localStorage.setItem(usersKey, JSON.stringify(users));
+}
+
+if(users.length > 2){
+    users.shift();
     localStorage.setItem(usersKey, JSON.stringify(users));
 }
 
@@ -31,7 +49,7 @@ function fakeBackend() {
     // Intercept any fetch made
     const realFetch = window.fetch;
 
-    window.fetch = function (url, opts: any): Promise<Response> {
+    window.fetch = function (url, opts: any = {}): Promise<Response> {
         return new Promise((resolve, reject) => {
             // Wrap the function in a timeout to simulate a delay as in an API request
             // If we don't set a timeout the response works automatically 
@@ -39,23 +57,29 @@ function fakeBackend() {
 
             // Handle fake routes as if we are making API calls
             function handleRoute() {
-                console.log(opts)
-                const { method } = opts;
+                if (!opts) {
+                    return reject(new Error("Opts are undefined"));
+                }
+                const { method } = opts
                 switch (true) {
-                    // If the array ends w/url and request certain method, then run fn
+                    // If the url ends w/route and request certain method, then run fn
                     case url.toString().endsWith('/users/authenticate') && method === 'POST':
                         return authenticate();
+
                     case url.toString().endsWith('/users/refresh-token') && method === 'POST':
                         return refreshToken();
+
                     case url.toString().endsWith('/users/revoke-token') && method === 'POST':
                         return revokeToken();
+
                     case url.toString().endsWith('/users') && method === 'GET':
                         return getUsers();
+
                     default:
                         // Pass through any requests not handled above
                         return realFetch(url, opts)
-                            .then(response => resolve(response))
-                            .catch(error => reject(error));
+                            .then((response) => resolve(response))
+                            .catch((error) => reject(error));
                 }
             }
 
@@ -71,6 +95,7 @@ function fakeBackend() {
                 // Generates refresh token and assigns it to the user
                 user.refreshTokens.push(generateRefreshToken());
                 localStorage.setItem(usersKey, JSON.stringify(users));
+
                 return ok({
                     id: user.id,
                     username: user.username,
