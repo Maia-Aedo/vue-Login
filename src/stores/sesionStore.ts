@@ -41,8 +41,8 @@ export const useSesionStore = defineStore({
         async refreshToken() {
             this.sesion.loading = true;
             try {
-                const token = await fetchWrapper.post(`${baseUrl}/refresh-token`, {}, { credentials: 'include' });
-                console.log('respuesta', token)
+                const tokenResponse = await fetchWrapper.post(`${baseUrl}/refresh-token`, {}, { credentials: 'include' });
+                const token = tokenResponse.jwtToken;
                 const decodedToken = JSON.parse(atob(token.split('.')[1]));
                 const creacion = new Date();
                 const expiracion = new Date(decodedToken.exp * 1000);
@@ -82,6 +82,8 @@ export const useSesionStore = defineStore({
             fetchWrapper.post(`${baseUrl}/revoke-token`, {}, { credentials: 'include'});
             this.stopTokenTimer();
             this.sesion.data = null;
+            router.push('/')
+            console.log('Cerrando sesion')
         }
     }
 })

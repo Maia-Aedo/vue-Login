@@ -27,7 +27,7 @@ export const useAuthStore = defineStore({
             this.stopRefreshTokenTimer();
             // The user data goes empty
             this.auth.data = null;
-            router.push({ name: '/' })
+            router.push({ name: 'login' })
         },
         async refreshToken() {
             try {

@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/userStore';
-import type { User } from '@/models/UserModel';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import { useSesionStore } from '@/stores/sesionStore';
 
-
 const router = useRouter();
 const authStore = useAuthStore();
 const sesionStore = useSesionStore();
-const userStore = useUserStore();
 
 // Users stored in localstorage - the same as in fakebackend
 const usersKey = 'vue-3-jwt-refresh-token-users';
